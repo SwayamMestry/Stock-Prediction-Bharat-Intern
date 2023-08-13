@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[18]:
+# In[1]:
 
 
 import numpy as np 
@@ -14,27 +14,27 @@ from keras.layers import Dense, LSTM
 import math
 
 
-# In[28]:
+# In[2]:
 
 
 df=pd.read_csv("tesla.csv")
 df.info()
 
 
-# In[20]:
+# In[3]:
 
 
 df['Date'] = pd.to_datetime(df['Date'])
 df.set_index('Date',inplace=True)
 
 
-# In[27]:
+# In[4]:
 
 
 df.shape
 
 
-# In[29]:
+# In[5]:
 
 
 plt.figure(figsize=(16,8))
@@ -45,17 +45,16 @@ plt.ylabel('Close Price USD', fontsize = 18)
 plt.show()
 
 
-# In[30]:
+# In[6]:
 
 
-# create a new data frame with only 'Close column'
 data = df.filter(['Close'])
 dataset = data.values #convert the data frame to a numpy array
 training_data_len = math.ceil(len(dataset)*.8)  # number of rows to train the model on
 training_data_len
 
 
-# In[31]:
+# In[7]:
 
 
 scaler = MinMaxScaler(feature_range=(0,1))
@@ -63,11 +62,8 @@ scaled_data = scaler.fit_transform(dataset)
 scaled_data
 
 
-# In[32]:
+# In[8]:
 
-
-#create the training dataset
-#create the scaled training dataset
 
 train_data = scaled_data[0:training_data_len, :]
 #Split the data into x_train, y_train datasets
@@ -82,24 +78,22 @@ for i in range(60,len(train_data)):
         print()
 
 
-# In[33]:
+# In[9]:
 
 
 x_train,y_train = np.array(x_train), np.array(y_train)
 
 
-# In[34]:
+# In[10]:
 
 
-#reshape the data
 x_train = np.reshape(x_train,(x_train.shape[0],x_train.shape[1],1))
 x_train.shape
 
 
-# In[35]:
+# In[11]:
 
 
-#Build the LSTM model
 model =Sequential()
 model.add(LSTM(64,return_sequences=True, input_shape=(x_train.shape[1],1)))
 model.add(LSTM(64, return_sequences= False))
@@ -107,25 +101,21 @@ model.add(Dense(32))
 model.add(Dense(1))
 
 
-# In[36]:
+# In[12]:
 
 
-#Complie the model
 model.compile(optimizer='adam', loss='mean_squared_error')
 
 
-# In[37]:
+# In[13]:
 
 
-#Train the model
 model.fit(x_train,y_train, batch_size=1, epochs=10)
 
 
-# In[38]:
+# In[14]:
 
 
-#create the testing data sets
-#create a new array containing scale values from index 1543 to 2003
 test_data= scaled_data[training_data_len-60:, :]
 #create the data sets x_test and y_test
 x_test = []
@@ -134,33 +124,29 @@ for i in range(60,len(test_data)):
     x_test.append(test_data[i-60:i,0])
 
 
-# In[39]:
+# In[15]:
 
 
-#convert the data to a numpy array
 x_test = np.array(x_test)
 
 
-# In[40]:
+# In[16]:
 
 
-#reshape the data
 x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1],1))
 x_test.shape
 
 
-# In[41]:
+# In[17]:
 
 
-#predicting the data
 predictions = model.predict(x_test)
 predictions = scaler.inverse_transform(predictions)
 
 
-# In[52]:
+# In[18]:
 
 
-#plot the data
 train = data[:training_data_len]
 valid = data[training_data_len:]
 valid['Predictions'] = predictions
@@ -171,28 +157,25 @@ plt.xlabel('Date', fontsize=18)
 plt.ylabel('Close Price' ,fontsize=18)
 plt.plot(train['Close'],linewidth=3.5)
 plt.plot(valid[['Close','Predictions']],linewidth=3.5)
-plt.legend(['Train','Valid','Predictions'], loc='upper_center')
+plt.legend(['Train','Valid','Predictions'], loc='upper center')
 
 
-# In[42]:
+# In[19]:
 
 
-#get the root mean square error(RMSE)
 rmse = np.sqrt(np.mean(predictions - y_test)**2)
 rmse
 
 
-# In[48]:
+# In[20]:
 
 
-#show the valid and predicted price
 valid
 
 
-# In[46]:
+# In[21]:
 
 
-#get the quote
 tesla_quote = pd.read_csv('tesla.csv')
 #Create new data frame
 new_df = tesla_quote.filter(['Close'])
@@ -215,10 +198,9 @@ pred_price = scaler.inverse_transform(pred_price)
 pred_price
 
 
-# In[51]:
+# In[22]:
 
 
-# Plot the actual values
 plt.plot(valid['Close'], label='Actual') 
 
 # Plot the predicted values
@@ -230,10 +212,4 @@ plt.ylabel('Close Price')
 plt.legend()
 
 plt.show()
-
-
-# In[ ]:
-
-
-
 
